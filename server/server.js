@@ -190,6 +190,66 @@ app.get('/authors/:id_author', isAuthenticated, async (req, res) => {
     }
 });
 
+// ENDPOINT PARA INICIALIZAR BASE DE DATOS EN RENDER
+app.get('/seed', async (req, res) => {
+    try {
+        // Crear tabla authors
+        await db.none(`
+            CREATE TABLE IF NOT EXISTS authors (
+                id_author SERIAL PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                birth_date DATE,
+                phone VARCHAR(50),
+                email VARCHAR(100),
+                username VARCHAR(50),
+                password VARCHAR(255)
+            )
+        `);
+        console.log('✅ Tabla authors creada');
+
+        // Crear tabla posts
+        await db.none(`
+            CREATE TABLE IF NOT EXISTS posts (
+                id_post SERIAL PRIMARY KEY,
+                title VARCHAR(200) NOT NULL,
+                text TEXT,
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                img VARCHAR(500),
+                id_author INTEGER REFERENCES authors(id_author)
+            )
+        `);
+        console.log('✅ Tabla posts creada');
+
+        // Insertar autor
+        await db.none(`
+            INSERT INTO authors (name, birth_date, phone, email, username, password) 
+            VALUES ('Carolina Ramírez', '2005-12-05', '235 110 42 32', 'carito.hola1119@gmail.com', 'carolina', 'carolina123')
+            ON CONFLICT (id_author) DO NOTHING
+        `);
+        console.log('✅ Autor insertado');
+
+        // Insertar posts
+        await db.none(`
+            INSERT INTO posts (title, text, img, id_author) VALUES 
+            ('Guayabina tomando el sol', 'Guayabina disfruta mucho tomar el sol en el jardín, se acuesta en su lugar favorito y cierra los ojitos.', '78cab2dc-ef08-43c7-87e3-baa15ea99815.JPG', 1),
+            ('Guayabina con peluche', 'A Guayabina le encanta dormir abrazada a su peluche favorito, no se despierta hasta que le dan de comer.', '74AEFE3F-A8BF-44C2-94B2-AB96CB0A9EA6.JPG', 1),
+            ('Guayabina bañada', 'Después del baño, Guayabina queda muy suavecita y corre por toda la casa muy feliz.', '6d3bd2e2-62d4-4ba5-b0b1-03e5f74d9068.JPG', 1),
+            ('Pichirola pensativa', 'Pichirola se queda pensativa mirando por la ventana, esperando a que llegue su persona favorita.', 'E8948BF9-D580-481E-8B76-16FC77E58ED6.JPG', 1),
+            ('Pichi coqueta', 'Pichi se pone muy coqueta cuando le ponemos moños, le encanta sentirse bonita.', 'IMG_3147.jpg', 1),
+            ('Pichirola Selfie', 'A Pichirola le encanta tomarse selfies, siempre posa cuando ve el celular y sale muy linda.', 'IMG_9260.jpg', 1),
+            ('Pichi y Guayabina', 'Pichi y Guayabina son las mejores amigas, siempre juegan juntas y se cuidan la una a la otra.', '72F89785-A3C5-4BFC-906D-B004CD81E3DD.JPG', 1)
+            ON CONFLICT (id_post) DO NOTHING
+        `);
+        console.log('✅ Posts insertados');
+
+        res.json({ success: true, message: 'Base de datos inicializada correctamente' });
+    } catch (error) {
+        console.error('❌ Error en seed:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
 const PORT = 8000;
 app.listen(PORT, () => {
     console.log(`🚀 Servidor en http://localhost:${PORT}`);
