@@ -22,7 +22,8 @@ const db = pgp({
     port: process.env.DB_PORT || 5432,
     database: process.env.DB_NAME || 'blog_db',
     user: process.env.DB_USER || 'ivettemonfil',
-    password: process.env.DB_PASS || ''
+    password: process.env.DB_PASS || '',
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
 // ============ SESIÓN CON VARIABLES DE ENTORNO ============
