@@ -9,40 +9,40 @@ const pgSession = require('connect-pg-simple')(session);
 
 const app = express();
 
-
+// ============ CORS CON VARIABLES DE ENTORNO ============
 app.use(cors({
-    origin: 'http://localhost:5173', 
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true
 }));
 app.use(express.json());
 
-
+// ============ BASE DE DATOS CON VARIABLES DE ENTORNO ============
 const db = pgp({
-    host: 'localhost',
-    port: 5432,
-    database: 'blog_db',
-    user: 'ivettemonfil',
-    password: ''
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME || 'blog_db',
+    user: process.env.DB_USER || 'ivettemonfil',
+    password: process.env.DB_PASS || ''
 });
 
-
+// ============ SESIÓN CON VARIABLES DE ENTORNO ============
 app.use(session({
     store: new pgSession({
         pgPromise: db,
         tableName: 'session',
         createTableIfMissing: true
     }),
-    secret: 'mi_secreto_super_seguro_para_blog',
+    secret: process.env.SESSION_SECRET || 'mi_secreto_super_seguro_para_blog',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24, 
+        maxAge: 1000 * 60 * 60 * 24,
         httpOnly: true,
-        secure: false
+        secure: process.env.NODE_ENV === 'production'
     }
 }));
 
-
+// ============ MIDDLEWARE DE AUTENTICACIÓN ============
 function isAuthenticated(req, res, next) {
     if (req.session.userId) {
         return next();
@@ -50,7 +50,7 @@ function isAuthenticated(req, res, next) {
     res.status(401).json({ error: 'No autorizado', message: 'Debes iniciar sesión' });
 }
 
-
+// ============ CONFIGURACIÓN DE ASSETS ============
 const assetsPath = path.join(__dirname, '..', 'client', 'src', 'assets');
 
 if (!fs.existsSync(assetsPath)) {
@@ -59,7 +59,7 @@ if (!fs.existsSync(assetsPath)) {
 
 app.use('/assets', express.static(assetsPath));
 
-
+// ============ CONFIGURACIÓN DE MULTER ============
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, assetsPath);
@@ -71,7 +71,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// ============ ENDPOINTS ============
 
+// Login
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     
@@ -103,7 +105,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-
+// Logout
 app.post('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -114,7 +116,7 @@ app.post('/logout', (req, res) => {
     });
 });
 
-
+// Verificar sesión
 app.get('/session', (req, res) => {
     if (req.session.userId) {
         res.json({
@@ -130,6 +132,7 @@ app.get('/session', (req, res) => {
     }
 });
 
+// Obtener todos los posts
 app.get('/posts', async (req, res) => {
     try {
         const posts = await db.any(`
@@ -145,7 +148,7 @@ app.get('/posts', async (req, res) => {
     }
 });
 
-
+// Obtener un post por ID
 app.get('/posts/:id_post', async (req, res) => {
     try {
         const post = await db.oneOrNone(`
@@ -190,9 +193,9 @@ app.get('/authors/:id_author', isAuthenticated, async (req, res) => {
     }
 });
 
+
 app.get('/seed', async (req, res) => {
     try {
-        
         await db.none(`
             CREATE TABLE IF NOT EXISTS authors (
                 id_author SERIAL PRIMARY KEY,
@@ -206,7 +209,6 @@ app.get('/seed', async (req, res) => {
         `);
         console.log(' Tabla authors creada');
 
-        // Crear tabla posts
         await db.none(`
             CREATE TABLE IF NOT EXISTS posts (
                 id_post SERIAL PRIMARY KEY,
@@ -219,15 +221,13 @@ app.get('/seed', async (req, res) => {
         `);
         console.log(' Tabla posts creada');
 
-        // Insertar autor
         await db.none(`
             INSERT INTO authors (name, birth_date, phone, email, username, password) 
             VALUES ('Carolina Ramírez', '2005-12-05', '235 110 42 32', 'carito.hola1119@gmail.com', 'carolina', 'carolina123')
             ON CONFLICT (id_author) DO NOTHING
         `);
-        console.log('Autor insertado');
+        console.log(' Autor insertado');
 
-        // Insertar posts
         await db.none(`
             INSERT INTO posts (title, text, img, id_author) VALUES 
             ('Guayabina tomando el sol', 'Guayabina disfruta mucho tomar el sol en el jardín, se acuesta en su lugar favorito y cierra los ojitos.', '78cab2dc-ef08-43c7-87e3-baa15ea99815.JPG', 1),
@@ -249,7 +249,7 @@ app.get('/seed', async (req, res) => {
 });
 
 
-const PORT = 8000;
+const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
-    console.log(` Servidor en http://localhost:${PORT}`);
+    console.log(`Servidor en http://localhost:${PORT}`);
 });
