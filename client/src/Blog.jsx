@@ -5,7 +5,7 @@ export default function Blog({ onSelectPost }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/posts")
+    fetch(import.meta.env.VITE_API_URL + '/posts')
       .then(res => res.json())
       .then(data => {
         setPosts(data);
