@@ -190,10 +190,9 @@ app.get('/authors/:id_author', isAuthenticated, async (req, res) => {
     }
 });
 
-// ENDPOINT PARA INICIALIZAR BASE DE DATOS EN RENDER
 app.get('/seed', async (req, res) => {
     try {
-        // Crear tabla authors
+        
         await db.none(`
             CREATE TABLE IF NOT EXISTS authors (
                 id_author SERIAL PRIMARY KEY,
@@ -205,7 +204,7 @@ app.get('/seed', async (req, res) => {
                 password VARCHAR(255)
             )
         `);
-        console.log('✅ Tabla authors creada');
+        console.log(' Tabla authors creada');
 
         // Crear tabla posts
         await db.none(`
@@ -218,7 +217,7 @@ app.get('/seed', async (req, res) => {
                 id_author INTEGER REFERENCES authors(id_author)
             )
         `);
-        console.log('✅ Tabla posts creada');
+        console.log(' Tabla posts creada');
 
         // Insertar autor
         await db.none(`
@@ -226,7 +225,7 @@ app.get('/seed', async (req, res) => {
             VALUES ('Carolina Ramírez', '2005-12-05', '235 110 42 32', 'carito.hola1119@gmail.com', 'carolina', 'carolina123')
             ON CONFLICT (id_author) DO NOTHING
         `);
-        console.log('✅ Autor insertado');
+        console.log('Autor insertado');
 
         // Insertar posts
         await db.none(`
@@ -240,11 +239,11 @@ app.get('/seed', async (req, res) => {
             ('Pichi y Guayabina', 'Pichi y Guayabina son las mejores amigas, siempre juegan juntas y se cuidan la una a la otra.', '72F89785-A3C5-4BFC-906D-B004CD81E3DD.JPG', 1)
             ON CONFLICT (id_post) DO NOTHING
         `);
-        console.log('✅ Posts insertados');
+        console.log(' Posts insertados');
 
         res.json({ success: true, message: 'Base de datos inicializada correctamente' });
     } catch (error) {
-        console.error('❌ Error en seed:', error);
+        console.error('Error en seed:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -252,5 +251,5 @@ app.get('/seed', async (req, res) => {
 
 const PORT = 8000;
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor en http://localhost:${PORT}`);
+    console.log(` Servidor en http://localhost:${PORT}`);
 });
