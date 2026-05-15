@@ -44,7 +44,7 @@ export default function Blog({ onSelectPost }) {
             >
               {post.img ? (
                 <img 
-                  src={`http://localhost:8000/assets/${post.img}`} 
+                src={`${import.meta.env.VITE_API_URL}/assets/${post.img}`} 
                   alt={post.title}
                   onError={(e) => {
                     e.target.src = "https://via.placeholder.com/300x200?text=🐾";
