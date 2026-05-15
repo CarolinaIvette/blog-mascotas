@@ -14,7 +14,7 @@ function App() {
 
 
   useEffect(() => {
-    fetch("http://localhost:8000/session", {
+    fetch(import.meta.env.VITE_API_URL + "/session", {
       credentials: "include"
     })
       .then(res => res.json())
@@ -34,7 +34,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:8000/logout", {
+      const response = await fetch(import.meta.env.VITE_API_URL + "/logout", {
         method: "POST",
         credentials: "include"
       });

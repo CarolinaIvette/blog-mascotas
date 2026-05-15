@@ -26,8 +26,8 @@ export default function NewPost({ onBack }) {
     formData.append("title", title);
     formData.append("text", text);
     if (img) formData.append("img", img);
-
-    fetch("http://localhost:8000/posts/new", {
+    
+    fetch(import.meta.env.VITE_API_URL + "/posts/new", {
       method: "POST",
       body: formData
     })

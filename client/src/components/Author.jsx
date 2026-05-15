@@ -5,7 +5,7 @@ export default function Author({ onBack }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch("http://localhost:8000/authors/1", {
+        fetch(import.meta.env.VITE_API_URL + "/authors/1", {
             credentials: "include"
         })
             .then(res => {

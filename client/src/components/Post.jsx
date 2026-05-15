@@ -5,7 +5,7 @@ export default function Post({ id_post, onBack }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/posts/${id_post}`)
+    fetch(import.meta.env.VITE_API_URL + `/posts/${id_post}`)
       .then(res => res.json())
       .then(data => {
         setPost(data);
@@ -64,7 +64,7 @@ export default function Post({ id_post, onBack }) {
         {post.img && (
           <img 
             className="post-image"
-            src={`http://localhost:8000/assets/${post.img}`} 
+            src={`${import.meta.env.VITE_API_URL}/assets/${post.img}`}
             alt={post.title}
             onError={(e) => {
               e.target.src = "https://via.placeholder.com/800x400?text=🐾";
